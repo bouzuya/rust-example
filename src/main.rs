@@ -10,13 +10,25 @@ use hyper::net::HttpsConnector;
 use hyper_native_tls::NativeTlsClient;
 use url::{ParseError, Url};
 
-fn collection_uri(hatena_id: &str, blog_id: &str) -> Result<Url, ParseError> {
+#[derive(Debug)]
+enum UriError {
+    ArgumentError(String),
+    FormatError(ParseError),
+}
+
+fn collection_uri(hatena_id: &str, blog_id: &str) -> Result<Url, UriError> {
+    if hatena_id.is_empty() {
+        return Err(UriError::ArgumentError("hatena_id".to_owned()));
+    }
+    if blog_id.is_empty() {
+        return Err(UriError::ArgumentError("blog_id".to_owned()));
+    }
     let base_url = "https://blog.hatena.ne.jp";
     let url_string = format!("{base_url}/{hatena_id}/{blog_id}/atom/entry",
                              base_url = base_url,
                              hatena_id = hatena_id,
                              blog_id = blog_id);
-    Url::parse(&url_string)
+    Url::parse(&url_string).map_err(|e| UriError::FormatError(e))
 }
 
 fn get() {
