@@ -19,16 +19,14 @@ fn get() {
     let blog_id = env::var("HATENA_BLOG_ID").unwrap();
     let api_key = env::var("HATENA_API_KEY").unwrap();
     let url = collection_uri(&hatena_id, &blog_id);
-    let username = hatena_id;
-    let password = api_key;
 
     let ssl = NativeTlsClient::new().unwrap();
     let connector = HttpsConnector::new(ssl);
     let client = Client::with_connector(connector);
     let mut headers = Headers::new();
     let basic = Basic {
-        username: username.to_owned(),
-        password: Some(password.to_owned()),
+        username: hatena_id.to_owned(),
+        password: Some(api_key.to_owned()),
     };
     headers.set(Authorization(basic));
     let mut res = client.get(&url).headers(headers).send().unwrap();
